@@ -20,11 +20,30 @@ class App extends Component {
 				stringSim: null,
 				velAct: null,
 			},
-			isLoading: true
+			isLoading: true,
+			timer: 0,
 		}
 
 		this.auth = new AuthService();
 		this.makeRequests();
+		this.interval = this.makeInterval();
+	}
+
+	makeInterval = () => {
+		return setInterval(() => {
+			this.setState({timer: this.state.timer + 1})
+		}, 1000)
+	}
+
+	componentWillUnmount = () => {
+		clearInterval(this.interval)
+	}
+
+	secToMin = (sec) => {
+		let str;
+		let time = {hour: Math.floor(sec / 3600), minutes: (Math.floor(sec / 60) % 60), seconds: (sec % 60)};
+		str = (time.hour <= 9 ? ("0" + time.hour) : time.hour) + ":" + (time.minutes <= 9 ? ("0" + time.minutes) : time.minutes) + ":" + (time.seconds <= 9 ? ("0" + time.seconds) : time.seconds);
+		return str;
 	}
 
 	makeRequests = () => {
@@ -82,55 +101,112 @@ class App extends Component {
 					{this.state.isLoading 
 						? <ActivityIndicator />
 						: (
-							<View style={styles.dashboard}>
-								<View style={styles.dashboardText}>
-									<Text style={styles.dashboardTitle}>
-										Линия 1
-									</Text>
-									<Text style={styles.dashboardUntitle}>
-										{this.state.data.prodArt1}
-									</Text>
-								</View>
-								
-								<View style={styles.textCircle}>
-									<Text style={styles.titleNow}>ME</Text> 
-									<Text style={styles.titleMouth}>Месяц</Text> 
-								</View>
-								
-								<View style={styles.graphicArea}>
-									<ProgressCircle
-										percent={this.state.data.meAct}
-										radius={70}
-										borderWidth={12}
-										color={this.state.data.meAct > 70 ? "#f80000" : "#00c18b"}
-										bgColor="#000000"
-									><Text style={styles.textGrapch}>{this.state.data.meAct}</Text></ProgressCircle>
-									<View style={{width: 20}}></View>
-									<ProgressCircle
-										percent={this.state.data.mePlan}
-										radius={70}
-										borderWidth={12}
-										color={this.state.data.mePlan > 100 ? "#00c18b" : "#f80000"}
-										bgColor="#000000"
-									><Text style={styles.textGrapch}>{this.state.data.mePlan}</Text></ProgressCircle>
-								</View>
+							<View>
+								<View style={styles.dashboard}>
+									<View style={styles.dashboardText}>
+										<Text style={styles.dashboardTitle}>
+											Линия 1
+										</Text>
+										<Text style={styles.dashboardUntitle}>
+											{this.state.data.prodArt1}
+										</Text>
+									</View>
+									
+									<View style={styles.textCircle}>
+										<Text style={styles.titleNow}>ME</Text> 
+										<Text style={styles.titleMouth}>Месяц</Text> 
+									</View>
+									
+									<View style={styles.graphicArea}>
+										<ProgressCircle
+											percent={this.state.data.meAct}
+											radius={70}
+											borderWidth={12}
+											color={this.state.data.meAct > 71 ? "#00c18b" : "#f80000"}
+											bgColor="#000000"
+										><Text style={styles.textGrapch}>{this.state.data.meAct}</Text></ProgressCircle>
+										<View style={{width: 20}}></View>
+										<ProgressCircle
+											percent={this.state.data.mePlan}
+											radius={70}
+											borderWidth={12}
+											color={this.state.data.mePlan > 71 ? "#00c18b" : "#f80000"}
+											bgColor="#000000"
+										><Text style={styles.textGrapch}>{this.state.data.mePlan}</Text></ProgressCircle>
+									</View>
 
-								<View style={styles.table}>
-									<Text style={styles.tableText}>Скорость</Text>
-									<Text style={styles.tableText}>{this.state.data.velAct}</Text>
-								</View>
+									<Text style={styles.speedText}>Скорость</Text>
+									<Text style={{fontSize: 40, color: this.state.data.velAct > 500 ? "#00c18b" : "#f80000"}}>
+										{this.state.data.velAct}
+									</Text>
 
-								<View style={styles.table}>
-									<Text style={styles.tableText}>КПД</Text>
-									<Text style={styles.tableText}>{this.state.data.randomSim}</Text>
-									<Text style={styles.tableText}>{this.state.data.stringSim}</Text>
+									<View style={styles.table}>
+										<Text style={styles.tableText}>Ошибки</Text>
+										<Text style={styles.tableText}>13</Text>
+										<Text style={styles.tableText}>0:42:06</Text>
+										<Text style={styles.tableText}>11.25%</Text>
+									</View>
+								
+									<Text style={styles.incTableText}>Последняя остановка</Text>
+									<View style={styles.table}>
+										<Text style={styles.tableTextLast}>401</Text>
+										<Text style={styles.tableTextLast}>5</Text>
+										<Text style={styles.tableTextLast}>0:12:22</Text>
+									</View>
 								</View>
 							
-								<Text style={styles.incTableText}>Последняя остановка</Text>
-								<View style={styles.table}>
-									<Text style={styles.tableTextLast}>401</Text>
-									<Text style={styles.tableTextLast}>5</Text>
-									<Text style={styles.tableTextLast}>0:12:22</Text>
+								<View style={styles.dashboard}>
+									<Text style={styles.stop}>СТОИТ {this.secToMin(this.state.timer)}</Text>
+									<View style={styles.dashboardText}>
+										<Text style={styles.dashboardTitle}>
+											Линия 2
+										</Text>
+										<Text style={styles.dashboardUntitle}>
+											Libero
+										</Text>
+									</View>
+									
+									<View style={styles.textCircle}>
+										<Text style={styles.titleNow}>ME</Text> 
+										<Text style={styles.titleMouth}>Месяц</Text> 
+									</View>
+									
+									<View style={styles.graphicArea}>
+										<ProgressCircle
+											percent={0}
+											radius={70}
+											borderWidth={12}
+											color={0 > 71 ? "#00c18b" : "#f80000"}
+											bgColor="#000000"
+										><Text style={styles.textGrapch}>{0}</Text></ProgressCircle>
+										<View style={{width: 20}}></View>
+										<ProgressCircle
+											percent={this.state.data.mePlan + 2}
+											radius={70}
+											borderWidth={12}
+											color={this.state.data.mePlan + 2 > 71 ? "#00c18b" : "#f80000"}
+											bgColor="#000000"
+										><Text style={styles.textGrapch}>{this.state.data.mePlan + 2}</Text></ProgressCircle>
+									</View>
+
+									<Text style={styles.speedText}>Скорость</Text>
+									<Text style={{fontSize: 40, color: 0 > 500 ? "#00c18b" : "#f80000"}}>
+										{0}
+									</Text>
+
+									<View style={styles.table}>
+										<Text style={styles.tableText}>Ошибки</Text>
+										<Text style={styles.tableText}>29</Text>
+										<Text style={styles.tableText}>{this.secToMin(6686 + this.state.timer)}</Text>
+										<Text style={styles.tableText}>11.25%</Text>
+									</View>
+								
+									<Text style={styles.incTableText}>Последняя остановка</Text>
+									<View style={styles.table}>
+										<Text style={styles.tableTextLast}>322</Text>
+										<Text style={styles.tableTextLast}>3</Text>
+										<Text style={styles.tableTextLast}>{this.secToMin(this.state.timer)}</Text>
+									</View>
 								</View>
 							</View>
 						)
@@ -221,11 +297,16 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold', 
 		color: "#ffffff",
 	},
+	speedText: {
+		fontSize: 20,
+		 color: '#ffffff',
+	},
 	table: {
 		flexDirection: 'row',
 		borderColor: "#18171f",
 		borderWidth: 4,
 		width: Dimensions.get('window').width * 0.8,
+		marginBottom: 20,
 	},
 	tableText: {
 		paddingRight: 18,
@@ -234,7 +315,6 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 	},
 	incTableText: {
-		marginTop: 20,
 		color: "#ffffff",
 		fontSize: 25,
 		fontWeight: 'bold',
@@ -253,5 +333,11 @@ const styles = StyleSheet.create({
 	alertText: {
 		color: '#ffffff',
 		textAlign: 'center',
-	}
+	},
+	stop: {
+		marginTop: 10,
+		fontSize: 40,
+		color: "#f80000",
+		fontWeight: 'bold',
+	},
 });
