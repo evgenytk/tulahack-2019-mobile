@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { StyleSheet, SafeAreaView, View, Text, Image } from 'react-native';
+import { StyleSheet, ScrollView, SafeAreaView, View, Text, Image, Dimensions } from 'react-native';
+import ProgressCircle from 'react-native-progress-circle'
 import { name as appName } from '../app.json';
 import { AuthService } from './utils/AuthService.js';
 import { Button } from './components/Button';
@@ -10,23 +11,41 @@ class App extends Component {
 		super(props);
 		this.state = {
 			error: null,
+			data: {
+				meAct: null,
+				mePlan: null,
+				prodArt1: null,
+				prodArt2: null,
+				randomSim: null,
+				stringSim: null,
+				velAct: null,
+			}
 		}
 
 		this.auth = new AuthService();
-		this.interval = this.setInterval();
+		this.makeRequests();
 	}
 
-	componentWillUnmount() {
-		clearInterval(this.interval);
-	}
+	makeRequests = () => {
+		const keys = Object.keys(this.state.data);
+		const requests = keys.map(k => this.auth.fetch(`${this.props.url}/api/values/${k}`));
 
-	setInterval = () => {
-		return setInterval(() => {
-			console.log(123);
-		}, 1000);
+		Promise.all(requests).then(values => {
+			let { data } = this.state;
+
+			values.forEach(v => {
+				data = {...data, ...v}
+			});
+
+			this.setState({ error: null, data: data });
+			this.makeRequests();
+		}, reason => {
+			this.setState({ error: reason });
+		});
 	}
 
 	render() {
+
 		return (
 			<SafeAreaView style={styles.area}>
 				<View style={styles.header}>
@@ -35,14 +54,68 @@ class App extends Component {
 						source={require('./images/logo.png')}
 					/>
 				</View>
-				<View style={styles.container}>
-					<Button 
-						text="Изменить сервер"
-						size="small"
-						onPress={this.props.clearURL}
-					/>
-					<Text>123123123</Text>
-				</View>
+				<ScrollView>
+					<View style={styles.container}>
+						<Button 
+							text="Изменить сервер"
+							size="small"
+							onPress={this.props.clearURL}
+							style={{ marginBottom: 0 }}
+						/>
+					</View>
+					
+					<View style={styles.dashboard}>
+						<View style={styles.dashboardText}>
+							<Text style={styles.dashboardTitle}>
+								Линия 1
+							</Text>
+							<Text style={styles.dashboardUntitle}>
+								{this.state.data.prodArt1}
+							</Text>
+						</View>
+						
+						<View style={styles.textCircle}>
+							<Text style={styles.titleNow}>ME</Text> 
+							<Text style={styles.titleMouth}>Месяц</Text> 
+						</View>
+						
+						<View style={styles.graphicArea}>
+							<ProgressCircle
+								percent={this.state.data.meAct}
+								radius={70}
+								borderWidth={12}
+								color={this.state.data.meAct > 70 ? "#00c18b" : "#f80000"}
+								bgColor="#000000"
+							><Text style={styles.textGrapch}>{this.state.data.meAct}</Text></ProgressCircle>
+							<View style={{width: 20}}></View>
+							<ProgressCircle
+								percent={this.state.data.mePlan}
+								radius={70}
+								borderWidth={12}
+								color={this.state.data.mePlan > 100 ? "#00c18b" : "#f80000"}
+								bgColor="#000000"
+							><Text style={styles.textGrapch}>{this.state.data.mePlan}</Text></ProgressCircle>
+						</View>
+
+						<View style={styles.table}>
+							<Text style={styles.tableText}>Скорость</Text>
+							<Text style={styles.tableText}>{this.state.data.velAct}</Text>
+						</View>
+
+						<View style={styles.table}>
+							<Text style={styles.tableText}>КПД</Text>
+							<Text style={styles.tableText}>{this.state.data.randomSim}</Text>
+							<Text style={styles.tableText}>{this.state.data.stringSim}</Text>
+						</View>
+					
+						<Text style={styles.incTableText}>Последняя остановка</Text>
+						<View style={styles.table}>
+							<Text style={styles.tableTextLast}>401</Text>
+							<Text style={styles.tableTextLast}>5</Text>
+							<Text style={styles.tableTextLast}>0:12:22</Text>
+						</View>
+					</View>
+				</ScrollView>
 			</SafeAreaView>
 		);
 	}
@@ -51,10 +124,10 @@ class App extends Component {
 export default withURL(App);
 
 const styles = StyleSheet.create({
-	// area: {
-	// 	flex: 1,
-	// 	backgroundColor: '#FF5236'
-	// },
+	area: {
+		backgroundColor: '#ffffff',
+		height: Dimensions.get('window').height,
+	},
 	logo: {
 		width: 120,
 		height: 30,
@@ -72,5 +145,84 @@ const styles = StyleSheet.create({
     	// flex: 1,
     	// justifyContent: 'center',
     	// alignItems: 'center'
-    }
+	},
+	dashboard: {
+		alignItems: 'center',
+		marginTop: 10,
+		marginBottom: 20,
+		height: 'auto',
+		flex: 1,
+		margin: 20,
+		// width: Dimensions.get('window').width * 0.9,
+		backgroundColor: '#000000',
+		borderRadius: 15,
+	},
+	dashboardText: {
+		flexDirection: 'row',
+	},
+	dashboardTitle: {
+		color: '#ffffff',
+		marginTop: 20,
+		fontSize: 30,
+		fontWeight: 'bold',
+	},
+	dashboardUntitle: {
+		color: '#ffffff',
+		marginTop: 28,
+		paddingLeft: 20,
+		fontSize: 20,
+		fontWeight: 'bold',
+	},
+	textCircle: {
+		flexDirection: 'row',
+		marginTop: 10,
+		marginRight: 10,
+	},
+	titleNow: {
+		marginBottom: 10,
+		color: '#ffffff',
+		fontWeight: 'bold',
+		fontSize: 25,
+		paddingLeft: 30,
+	},
+	titleMouth: {
+		marginBottom: 10,
+		color: '#ffffff',
+		fontWeight: 'bold',
+		fontSize: 25,
+		paddingLeft: 95,
+	},
+	graphicArea: {
+		flexDirection: 'row',
+		marginBottom: 30,
+	},
+	textGrapch: {
+		fontSize: 30, 
+		fontWeight: 'bold', 
+		color: "#ffffff",
+	},
+	table: {
+		flexDirection: 'row',
+		borderColor: "#18171f",
+		borderWidth: 4,
+		width: Dimensions.get('window').width * 0.8,
+	},
+	tableText: {
+		paddingRight: 18,
+		paddingLeft: 2,
+		color: "#ffffff",
+		fontSize: 17,
+	},
+	incTableText: {
+		marginTop: 20,
+		color: "#ffffff",
+		fontSize: 25,
+		fontWeight: 'bold',
+	},
+	tableTextLast: {
+		paddingRight: 40,
+		paddingLeft: 20,
+		color: "#ffffff",
+		fontSize: 20,
+	},
 });

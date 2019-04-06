@@ -1,35 +1,72 @@
-// import axios from 'axios';
+import axios from 'axios';
 import { AsyncStorage } from 'react-native';
 
 export class AuthService {
-	fetch = (url, method, data = null) => {
-		// REMOVE THAT!!!!
-		if(url.includes('api/test')){
+	fetch = (url, method = 'GET', data = null) => {
+
+		let tag = url.split('/');
+			tag = tag[tag.length - 1]
+
+		if(url.includes('localhost:5000/api/values/meAct')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
-					resolve([1,2,3]);
+					resolve({[tag]: 65});
+				}, 1500)
+			})
+		}
+
+		if(url.includes('localhost:5000/api/values/mePlan')){
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({[tag]: 71});
+				}, 1500)
+			})
+		}
+
+		if(url.includes('localhost:5000/api/values/prodArt1')){
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({[tag]: 'Zewa'});
+				}, 1500)
+			})
+		}
+
+		if(url.includes('localhost:5000/api/values/prodArt2')){
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({[tag]: 'Tork'});
+				}, 1500)
+			})
+		}
+
+		if(url.includes('localhost:5000/api/values/randomSim')){
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({[tag]: (Math.random() * 100).toFixed()});
+				}, 1500)
+			})
+		}
+
+		if(url.includes('localhost:5000/api/values/stringSim')){
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({[tag]: 'hello'});
+				}, 1500)
+			})
+		}
+
+		if(url.includes('localhost:5000/api/values/velAct')){
+			return new Promise((resolve, reject) => {
+				setTimeout(() => {
+					resolve({[tag]: 545});
 				}, 1500)
 			})
 		}
 
 		return new Promise((resolve, reject) => {
-			AsyncStorage.getItem('id_token').then((token) => {
-				fetch(`http://tester1.evgenytk.ru/${url}`, {
-			    	method: method.toUpperCase(),
-	      			headers: {
-	      	            'Accept': 'application/json',
-	      	            'Content-Type': 'application/json',
-	      	            'Authorization': 'Bearer ' + token
-					},
-					body: data ? JSON.stringify(data) : null
-			    })
-				.then(response => !response.ok 
-					? reject(JSON.parse(response.text())) 
-					: resolve(JSON.parse(response.text()))
-				)
-			    .catch(error => reject(error))
-			    .done();
-			})
+			axios.get(url)
+				 .then((data) => resolve(data))
+				 .catch(() => reject('Произошла ошибка'));
 		})
 	}
 
