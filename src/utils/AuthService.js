@@ -7,15 +7,16 @@ export class AuthService {
 		let tag = url.split('/');
 			tag = tag[tag.length - 1]
 
-		if(url.includes('localhost:5000/api/values/meAct')){
+		if(url.includes('localhost:5001/api/values/meAct')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
-					resolve({[tag]: 65});
+					const data = [65, 62, 75, 44, 55, 80];
+					resolve({[tag]: data[Math.floor(Math.random() * data.length)]});
 				}, 1500)
 			})
 		}
 
-		if(url.includes('localhost:5000/api/values/mePlan')){
+		if(url.includes('localhost:5001/api/values/mePlan')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
 					resolve({[tag]: 71});
@@ -23,7 +24,7 @@ export class AuthService {
 			})
 		}
 
-		if(url.includes('localhost:5000/api/values/prodArt1')){
+		if(url.includes('localhost:5001/api/values/prodArt1')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
 					resolve({[tag]: 'Zewa'});
@@ -31,7 +32,7 @@ export class AuthService {
 			})
 		}
 
-		if(url.includes('localhost:5000/api/values/prodArt2')){
+		if(url.includes('localhost:5001/api/values/prodArt2')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
 					resolve({[tag]: 'Tork'});
@@ -39,7 +40,7 @@ export class AuthService {
 			})
 		}
 
-		if(url.includes('localhost:5000/api/values/randomSim')){
+		if(url.includes('localhost:5001/api/values/randomSim')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
 					resolve({[tag]: (Math.random() * 100).toFixed()});
@@ -47,26 +48,28 @@ export class AuthService {
 			})
 		}
 
-		if(url.includes('localhost:5000/api/values/stringSim')){
+		if(url.includes('localhost:5001/api/values/stringSim')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
-					resolve({[tag]: 'hello'});
+					const data = ['data 1', 'data 2', 'data 3'];
+					resolve({[tag]: data[Math.floor(Math.random() * data.length)]});
 				}, 1500)
 			})
 		}
 
-		if(url.includes('localhost:5000/api/values/velAct')){
+		if(url.includes('localhost:5001/api/values/velAct')){
 			return new Promise((resolve, reject) => {
 				setTimeout(() => {
-					resolve({[tag]: 545});
+					const data = [545, 543, 560];
+					resolve({[tag]: data[Math.floor(Math.random() * data.length)]});
 				}, 1500)
 			})
 		}
 
 		return new Promise((resolve, reject) => {
-			axios.get(url)
+			axios.get(`http://${url}`)
 				 .then((data) => resolve(data))
-				 .catch(() => reject('Произошла ошибка'));
+				 .catch(() => reject('Произошла ошибка при выполнении запроса. Пожалуйста, попробуйте снова, а также проверьте адрес сервера.'));
 		})
 	}
 

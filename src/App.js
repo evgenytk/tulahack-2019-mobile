@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, ScrollView, SafeAreaView, View, Text, Image, Dimensions } from 'react-native';
+import { StyleSheet, ActivityIndicator, ScrollView, SafeAreaView, View, Text, Image, Dimensions } from 'react-native';
 import ProgressCircle from 'react-native-progress-circle'
 import { name as appName } from '../app.json';
 import { AuthService } from './utils/AuthService.js';
@@ -19,7 +19,8 @@ class App extends Component {
 				randomSim: null,
 				stringSim: null,
 				velAct: null,
-			}
+			},
+			isLoading: true
 		}
 
 		this.auth = new AuthService();
@@ -30,6 +31,8 @@ class App extends Component {
 		const keys = Object.keys(this.state.data);
 		const requests = keys.map(k => this.auth.fetch(`${this.props.url}/api/values/${k}`));
 
+		this.setState({ error: null });
+
 		Promise.all(requests).then(values => {
 			let { data } = this.state;
 
@@ -37,10 +40,10 @@ class App extends Component {
 				data = {...data, ...v}
 			});
 
-			this.setState({ error: null, data: data });
+			this.setState({ error: null, data: data, isLoading: false });
 			this.makeRequests();
 		}, reason => {
-			this.setState({ error: reason });
+			this.setState({ error: reason, isLoading: false });
 		});
 	}
 
@@ -62,59 +65,76 @@ class App extends Component {
 							onPress={this.props.clearURL}
 							style={{ marginBottom: 0 }}
 						/>
+						{this.state.error &&
+							<Button 
+								text="Повторить запрос"
+								size="small"
+								onPress={this.makeRequests}
+								style={{ marginTop: 10 }}
+							/>
+						}
+						{this.state.error &&
+							<View style={styles.alert}>
+								<Text style={styles.alertText}>{this.state.error}</Text>
+							</View>
+						}
 					</View>
-					
-					<View style={styles.dashboard}>
-						<View style={styles.dashboardText}>
-							<Text style={styles.dashboardTitle}>
-								Линия 1
-							</Text>
-							<Text style={styles.dashboardUntitle}>
-								{this.state.data.prodArt1}
-							</Text>
-						</View>
-						
-						<View style={styles.textCircle}>
-							<Text style={styles.titleNow}>ME</Text> 
-							<Text style={styles.titleMouth}>Месяц</Text> 
-						</View>
-						
-						<View style={styles.graphicArea}>
-							<ProgressCircle
-								percent={this.state.data.meAct}
-								radius={70}
-								borderWidth={12}
-								color={this.state.data.meAct > 70 ? "#00c18b" : "#f80000"}
-								bgColor="#000000"
-							><Text style={styles.textGrapch}>{this.state.data.meAct}</Text></ProgressCircle>
-							<View style={{width: 20}}></View>
-							<ProgressCircle
-								percent={this.state.data.mePlan}
-								radius={70}
-								borderWidth={12}
-								color={this.state.data.mePlan > 100 ? "#00c18b" : "#f80000"}
-								bgColor="#000000"
-							><Text style={styles.textGrapch}>{this.state.data.mePlan}</Text></ProgressCircle>
-						</View>
+					{this.state.isLoading 
+						? <ActivityIndicator />
+						: (
+							<View style={styles.dashboard}>
+								<View style={styles.dashboardText}>
+									<Text style={styles.dashboardTitle}>
+										Линия 1
+									</Text>
+									<Text style={styles.dashboardUntitle}>
+										{this.state.data.prodArt1}
+									</Text>
+								</View>
+								
+								<View style={styles.textCircle}>
+									<Text style={styles.titleNow}>ME</Text> 
+									<Text style={styles.titleMouth}>Месяц</Text> 
+								</View>
+								
+								<View style={styles.graphicArea}>
+									<ProgressCircle
+										percent={this.state.data.meAct}
+										radius={70}
+										borderWidth={12}
+										color={this.state.data.meAct > 70 ? "#f80000" : "#00c18b"}
+										bgColor="#000000"
+									><Text style={styles.textGrapch}>{this.state.data.meAct}</Text></ProgressCircle>
+									<View style={{width: 20}}></View>
+									<ProgressCircle
+										percent={this.state.data.mePlan}
+										radius={70}
+										borderWidth={12}
+										color={this.state.data.mePlan > 100 ? "#00c18b" : "#f80000"}
+										bgColor="#000000"
+									><Text style={styles.textGrapch}>{this.state.data.mePlan}</Text></ProgressCircle>
+								</View>
 
-						<View style={styles.table}>
-							<Text style={styles.tableText}>Скорость</Text>
-							<Text style={styles.tableText}>{this.state.data.velAct}</Text>
-						</View>
+								<View style={styles.table}>
+									<Text style={styles.tableText}>Скорость</Text>
+									<Text style={styles.tableText}>{this.state.data.velAct}</Text>
+								</View>
 
-						<View style={styles.table}>
-							<Text style={styles.tableText}>КПД</Text>
-							<Text style={styles.tableText}>{this.state.data.randomSim}</Text>
-							<Text style={styles.tableText}>{this.state.data.stringSim}</Text>
-						</View>
-					
-						<Text style={styles.incTableText}>Последняя остановка</Text>
-						<View style={styles.table}>
-							<Text style={styles.tableTextLast}>401</Text>
-							<Text style={styles.tableTextLast}>5</Text>
-							<Text style={styles.tableTextLast}>0:12:22</Text>
-						</View>
-					</View>
+								<View style={styles.table}>
+									<Text style={styles.tableText}>КПД</Text>
+									<Text style={styles.tableText}>{this.state.data.randomSim}</Text>
+									<Text style={styles.tableText}>{this.state.data.stringSim}</Text>
+								</View>
+							
+								<Text style={styles.incTableText}>Последняя остановка</Text>
+								<View style={styles.table}>
+									<Text style={styles.tableTextLast}>401</Text>
+									<Text style={styles.tableTextLast}>5</Text>
+									<Text style={styles.tableTextLast}>0:12:22</Text>
+								</View>
+							</View>
+						)
+					}
 				</ScrollView>
 			</SafeAreaView>
 		);
@@ -225,4 +245,13 @@ const styles = StyleSheet.create({
 		color: "#ffffff",
 		fontSize: 20,
 	},
+	alert: {
+		backgroundColor: '#e8453c',
+		padding: 15,
+		borderRadius: 6
+	},
+	alertText: {
+		color: '#ffffff',
+		textAlign: 'center',
+	}
 });
